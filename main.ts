@@ -33,7 +33,6 @@ namespace CustomLogger {
     //% block="רשום כותרות עמודה בקובץ $keys"
     //% weight=80
     export function writeHeaders(keys: string): void {
-        // אם הקובץ לא קיים או ריק, נכתוב את הכותרת בראשו
         if (files.size(filename) == 0) {
             files.appendLine(filename, keys);
         }
@@ -48,15 +47,60 @@ namespace CustomLogger {
     //% weight=70
     export function logData(value1: number, value2: number): void {
         let row = value1 + separator + value2;
-        // כתיבת השורה לתוך הקובץ הפנימי במיקרוביט
         files.appendLine(filename, row);
+    }
+
+    /**
+     * מחזיר חלק ממוקד מהנתונים בזיכרון כטקסט (בלוק עגול). אם הערכים 0, יוחזר כל הזיכרון.
+     * @param fromCol עמודת התחלה (0 לכולן), eg: 0
+     * @param toCol עמודת סיום (0 לכולן), eg: 0
+     * @param fromRow שורת התחלה (0 לכולן), eg: 0
+     * @param toRow שורת סיום (0 לכולן), eg: 0
+     */
+    //% block="תוכן הזיכרון: עמודות מ- $fromCol עד $toCol | שורות מ- $fromRow עד $toRow"
+    //% inlineInputMode=inline
+    //% weight=60
+    export function readDataChunk(fromCol: number, toCol: number, fromRow: number, toRow: number): string {
+        if (files.size(filename) == 0) {
+            return "הקובץ ריק";
+        }
+
+        let fullContent = files.readString(filename);
+
+        if (fromRow == 0 && toRow == 0 && fromCol == 0 && toCol == 0) {
+            return fullContent;
+        }
+
+        let lines = fullContent.split("\n");
+        let startRow = fromRow > 0 ? fromRow - 1 : 0;
+        let endRow = toRow > 0 ? Math.min(toRow, lines.length) : lines.length;
+
+        let resultResult = "";
+
+        for (let i = startRow; i < endRow; i++) {
+            let currentLine = lines[i].trim();
+            if (currentLine.length == 0) continue;
+
+            let columns = currentLine.split(separator);
+            let startCol = fromCol > 0 ? fromCol - 1 : 0;
+            let endCol = toCol > 0 ? Math.min(toCol, columns.length) : columns.length;
+
+            let slicedColumns: string[] = [];
+            for (let j = startCol; j < endCol; j++) {
+                slicedColumns.push(columns[j]);
+            }
+
+            resultResult += slicedColumns.join(separator) + "\n";
+        }
+
+        return resultResult.trim();
     }
 
     /**
      * קריאת כל הנתונים השמורים והדפסתם למחשב (דרך ה-Serial)
      */
     //% block="שלח את כל הנתונים השמורים למחשב"
-    //% weight=60
+    //% weight=50
     export function dumpLogToSerial(): void {
         if (files.size(filename) > 0) {
             let content = files.readString(filename);
@@ -70,7 +114,7 @@ namespace CustomLogger {
      * מחיקה מוחלטת של קובץ הלוג מהזיכרון הפנימי
      */
     //% block="מחק לחלוטין את קובץ הלוג מהזיכרון"
-    //% weight=50
+    //% weight=40
     export function deleteLogFile(): void {
         files.remove(filename);
         serial.writeLine("קובץ הלוג נמחק בהצלחה!");
