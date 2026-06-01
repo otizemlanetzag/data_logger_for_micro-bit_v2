@@ -1,9 +1,10 @@
 {
     "name": "microbit-custom-dataloader",
-    "version": "0.0.1",
-    "description": "לוגר נתונים מותאם אישית עבור עורך המיקרוביט שלי",
+    "version": "0.0.3",
+    "description": "לוגר נתונים מותאם אישית בזיכרון הפלאש עבור עורך המיקרוביט שלי",
     "dependencies": {
-        "core": "*"
+        "core": "*",
+        "files": "*"
     },
     "files": [
         "main.ts",
